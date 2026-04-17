@@ -1,0 +1,20 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: red;
+}
+
+.frontpage-bg {
+    background-color: green;
+    background-image: url("/images/background1.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: black;
+    text-align: center;
+    font-family: "roboto";
+    color: black;
+    height: 2000px;
+    margin: 0;
+}
