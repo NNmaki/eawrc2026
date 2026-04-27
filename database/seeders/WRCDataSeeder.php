@@ -2,14 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Rally;   // <-- tarvitset nämä mallit
+use App\Models\Stage;
 
 class WRCDataSeeder extends Seeder
 {
     public function run(): void
     {
+        
+
         $rallies = [
             [
                 'rally_name' => 'Rally Croatia',
@@ -150,20 +152,28 @@ class WRCDataSeeder extends Seeder
             ],
         ];
 
+
         foreach ($rallies as $rallyData) {
             $stages = $rallyData['stages'];
             unset($rallyData['stages']);
-            
-            $rallyId = DB::table('rallies')->insertGetId($rallyData);
-            
-            foreach ($stages as $stage) {
-                $stage['rally_id'] = $rallyId;
-                $stage['created_at'] = now();
-                $stage['updated_at'] = now();
-                DB::table('stages')->insert($stage);
+
+            // Hae olemassa oleva tai luo uusi — EI koskaan duplikaattia
+            $rally = Rally::firstOrCreate(
+                ['rally_name' => $rallyData['rally_name']], // hakuehto
+                $rallyData                                   // lisättävät kentät jos ei löydy
+            );
+
+            foreach ($stages as $stageData) {
+                Stage::firstOrCreate(
+                    [
+                        'rally_id'     => $rally->id,
+                        'stage_number' => $stageData['stage_number'],
+                    ],
+                    array_merge($stageData, ['rally_id' => $rally->id])
+                );
             }
         }
-        
+
         $this->command->info('WRC rallies and stages seeded successfully!');
     }
 }

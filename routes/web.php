@@ -2,10 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+use App\Http\Controllers\EventController;
 
-Route::get('/', function () {
-    return view('app');
-});
+Route::get('/', [EventController::class, 'index']);
+Route::get('/rallies/{rally}/stages', [EventController::class, 'getStages']); // AJAX
+Route::post('/events', [EventController::class, 'store']);
+Route::post('/events/{event}/stage-times', [EventController::class, 'saveStageTime']);
+
