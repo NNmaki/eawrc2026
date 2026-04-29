@@ -16,7 +16,8 @@ class EventController extends Controller
 {
     $rallies = Rally::orderBy('rally_name')->get();
     $events  = Event::with('rally')->latest('start_time')->get();
-    return view('app', compact('rallies', 'events'));
+    $nextEventNumber = Event::count() + 1;
+    return view('app', compact('rallies', 'events','nextEventNumber'));
 }
 
 
@@ -32,6 +33,7 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'event_name'  => 'required|string|max:255',
             'driver_name' => 'required|string|max:255',
             'class'       => 'required|in:WRC,WRC2,JUNIOR WRC',
             'car'         => 'required|string',
@@ -39,6 +41,7 @@ class EventController extends Controller
         ]);
 
         $event = Event::create([
+            'event_name'  => $request->event_name,
             'driver_name' => $request->driver_name,
             'class'       => $request->class,
             'car'         => $request->car,
@@ -67,17 +70,173 @@ class EventController extends Controller
             $request->milliseconds
         );
 
-        $stageTime = StageTime::updateOrCreate(
-            [
-                'event_id' => $event->id,
-                'stage_id' => $request->stage_id,
-            ],
-            [
-                'time_result' => $time,
-                'recorded_at' => now(),
-            ]
-        );
 
-        return response()->json(['success' => true, 'time' => $time]);
+
+
+
+        // $stageTime = StageTime::updateOrCreate(
+        //     [
+        //         'event_id' => $event->id,
+        //         'stage_id' => $request->stage_id,
+        //     ],
+        //     [
+        //         'time_result' => $time,
+        //         'recorded_at' => now(),
+        //     ]
+        // );
+        // return response()->json(['success' => true, 'time' => $time]);
+
+            // ...olemassa oleva koodi pysyy samana...
+
+    $stageTime = StageTime::updateOrCreate(
+        [
+            'event_id' => $event->id,
+            'stage_id' => $request->stage_id,
+        ],
+        [
+            'time_result' => $time,
+            'recorded_at' => now(),
+        ]
+    );
+
+    // Laske ja päivitä total_time aina kun aika tallennetaan
+    $this->updateTotalTime($event);
+    return response()->json(['success' => true, 'time' => $time]);
+
+
+
     }
+
+    // // Hae eventin tiedot + stage-ajat JSON-vastauksena
+    // public function show(Event $event)
+    // {
+    //     $event->load(['rally', 'stageTimes.stage']);
+    //     return response()->json($event);
+    // }
+
+    public function show(Event $event)
+{
+    $event->load(['rally.stages', 'stageTimes.stage']);
+    return response()->json($event);
+}
+
+
+
+
+
+    // Merkitse event päättyneeksi
+
+public function end(Event $event)
+{
+    $totalTime = $this->updateTotalTime($event);
+
+    $event->update(['completed' => true]);
+
+    $hours   = (int) substr($totalTime, 0, 2);
+    $minutes = (int) substr($totalTime, 3, 2);
+    $seconds = (int) substr($totalTime, 6, 2);
+    $ms      = (int) substr($totalTime, 9, 3);
+
+    $displayTime = sprintf("%d'%02d\"%03d", ($hours * 60) + $minutes, $seconds, $ms);
+
+    return response()->json(['success' => true, 'total_time' => $displayTime]);
+}
+
+
+// public function end(Event $event)
+// {
+//     $stageTimes = $event->stageTimes()->pluck('time_result');
+
+//     $totalMs = $stageTimes->sum(function ($time) {
+//         $parts = explode(':', $time);
+
+//         if (count($parts) === 3) {
+//             [$h, $m, $rest] = $parts;
+//         } elseif (count($parts) === 2) {
+//             $h = 0;
+//             [$m, $rest] = $parts;
+//         } else {
+//             return 0;
+//         }
+
+//         // Käsittele sekunnit ja mahdolliset millisekunnit erikseen
+//         $secParts = explode('.', $rest);
+//         $s  = (int) $secParts[0];
+//         $ms = isset($secParts[1]) ? (int) str_pad($secParts[1], 3, '0') : 0;
+
+//         return ((int)$h * 3600000) + ((int)$m * 60000) + ($s * 1000) + $ms;
+//     });
+
+//     // Muunna millisekunnit HH:MM:SS.mmm muotoon MySQL TIME-saraketta varten
+//     $hours   = floor($totalMs / 3600000);
+//     $totalMs -= $hours * 3600000;
+//     $minutes = floor($totalMs / 60000);
+//     $totalMs -= $minutes * 60000;
+//     $seconds = floor($totalMs / 1000);
+//     $ms      = $totalMs - ($seconds * 1000);
+
+//     // MySQL TIME muoto: HH:MM:SS.mmm
+//     $totalTime = sprintf('%02d:%02d:%02d.%03d', $hours, $minutes, $seconds, $ms);
+
+//     $event->update([
+//         'completed'  => true,
+//         'total_time' => $totalTime,
+//     ]);
+
+//     // Palautetaan näyttöystävällinen muoto frontendille
+//     $displayTime = sprintf("%d'%02d\"%03d", ($hours * 60) + $minutes, $seconds, $ms);
+
+//     return response()->json(['success' => true, 'total_time' => $displayTime]);
+// }
+
+
+
+
+
+
+
+
+    // public function end(Event $event)
+    // {
+    //     $event->update(['completed' => true]);
+    //     return response()->json(['success' => true]);
+    // }
+
+private function updateTotalTime(Event $event): string
+{
+    $stageTimes = $event->stageTimes()->pluck('time_result');
+
+    $totalMs = $stageTimes->sum(function ($time) {
+        $parts = explode(':', $time);
+
+        if (count($parts) === 3) {
+            [$h, $m, $rest] = $parts;
+        } elseif (count($parts) === 2) {
+            $h = 0;
+            [$m, $rest] = $parts;
+        } else {
+            return 0;
+        }
+
+        $secParts = explode('.', $rest);
+        $s  = (int) $secParts[0];
+        $ms = isset($secParts[1]) ? (int) str_pad($secParts[1], 3, '0') : 0;
+
+        return ((int)$h * 3600000) + ((int)$m * 60000) + ($s * 1000) + $ms;
+    });
+
+    $hours   = floor($totalMs / 3600000);
+    $totalMs -= $hours * 3600000;
+    $minutes = floor($totalMs / 60000);
+    $totalMs -= $minutes * 60000;
+    $seconds = floor($totalMs / 1000);
+    $ms      = $totalMs - ($seconds * 1000);
+
+    $totalTime = sprintf('%02d:%02d:%02d.%03d', $hours, $minutes, $seconds, $ms);
+    $event->update(['total_time' => $totalTime]);
+
+    return $totalTime;
+}
+
+
 }

@@ -4,18 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Event extends Model
+class StageTime extends Model
 {
     protected $fillable = [
-        'rally_id', 'driver_name', 'class', 'car',
-        'start_time', 'completed', 'total_time'
+        'event_id',
+        'stage_id',
+        'time_result',
+        'recorded_at',
     ];
 
-    public function rally() {
-        return $this->belongsTo(Rally::class);
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
     }
 
-    public function stageTimes() {
-        return $this->hasMany(StageTime::class);
+    public function stage()
+    {
+        return $this->belongsTo(Stage::class);
     }
 }

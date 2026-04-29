@@ -9,3 +9,6 @@ Route::get('/rallies/{rally}/stages', [EventController::class, 'getStages']); //
 Route::post('/events', [EventController::class, 'store']);
 Route::post('/events/{event}/stage-times', [EventController::class, 'saveStageTime']);
 
+Route::get('/events/{event}', [EventController::class, 'show']);
+Route::patch('/events/{event}/end', [EventController::class, 'end']);
+
