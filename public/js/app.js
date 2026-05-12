@@ -16,10 +16,17 @@
         document.body.style.overflow = '';
         resetModal();
     }
+
+
     document.getElementById('btnCloseModal').addEventListener('click', closeModal);
     document.getElementById('btnCancel').addEventListener('click', closeModal);
-    document.getElementById('modalOverlay').addEventListener('click',closeModal()
-    );
+
+    // document.getElementById('modalOverlay')
+    // .addEventListener('click', function (e) {
+    //     if (e.target === this) {
+    //         closeModal();
+    //     }
+    // });
 
     function resetModal() {
     document.getElementById('event_name').value = `EVENT ${nextEventNumber}`;
@@ -559,9 +566,14 @@ document.getElementById('btnEndEvent').addEventListener('click', async () => {
         }
         document.getElementById('btnCloseViewModal').addEventListener('click', closeViewModal);
         document.getElementById('btnCloseViewModal2').addEventListener('click', closeViewModal);
-        document.getElementById('viewModalOverlay').addEventListener('click', closeViewModal()
-        );
 
+   
+        // document.getElementById('viewModalOverlay')
+        //     .addEventListener('click', function (e) {
+        //         if (e.target === this) {
+        //             closeViewModal();
+        //         }
+        //     });
 
 
 async function saveStageTimeFromView(stageId, eventId, driverNumber = 1) {
