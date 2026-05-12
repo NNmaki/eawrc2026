@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
              $table->id();
             $table->foreignId('rally_id')->constrained('rallies')->onDelete('cascade');
-            $table->string('player_name');
+            $table->string('player_name')->nullable();
             $table->dateTime('start_time');
             $table->boolean('completed')->default(false);
             $table->time('total_time')->nullable();

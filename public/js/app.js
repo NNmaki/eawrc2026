@@ -18,9 +18,8 @@
     }
     document.getElementById('btnCloseModal').addEventListener('click', closeModal);
     document.getElementById('btnCancel').addEventListener('click', closeModal);
-    document.getElementById('modalOverlay').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('modalOverlay')) closeModal();
-    });
+    document.getElementById('modalOverlay').addEventListener('click',closeModal()
+    );
 
     function resetModal() {
     document.getElementById('event_name').value = `EVENT ${nextEventNumber}`;
@@ -145,13 +144,13 @@
     const rallyId    = document.getElementById('rally_select').value;
 
     if (!eventName) {
-        showNotif('Syötä tapahtuman nimi ensin.', true);
+        showNotif('Enter the event name first.', true);
         document.getElementById('event_name').focus();
         return false;
     }
 
     if (!driver1Name) {
-    showNotif('Syötä kuljettajan 1 nimi ensin.', true);
+    showNotif('Enter driver 1s name first.', true);
     document.getElementById('driver1_name').focus();
     return false;
     }
@@ -207,7 +206,7 @@
 
         return true;
     } catch {
-        showNotif('Eventin luonti epäonnistui.', true);
+        showNotif("Event creation failed.", true);
         return false;
     }
 }
@@ -225,7 +224,7 @@
     const ms      = document.getElementById(`ms-${driverNumber}-${stageId}`).value.padStart(3, '0');
 
     if (!minutes || !seconds || ms.length < 3) {
-        showNotif('Täytä kaikki aikakentät.', true);
+        showNotif('Please fill all time fields', true);
         return;
     }
 
@@ -261,7 +260,7 @@
     } catch {
         btn.disabled = false;
         btn.textContent = 'Save';
-        showNotif('Tallennus epäonnistui.', true);
+        showNotif('Saving failed', true);
     }
 }
     // ── "Create Event" -nappi ilman stageja (jos haluaa luoda ensin) ──
@@ -289,7 +288,7 @@ document.getElementById('btnCreateEvent').addEventListener('click', async () => 
     // Piilota CREATE EVENT -nappi kun event on luotu
     document.getElementById('btnCreateEvent').style.display = 'none';
 
-    showNotif('Event luotu! Syötä stage-ajat.');
+    showNotif('Event created! Please enter stage times');
 });
 
     // ── Notification ──
@@ -438,30 +437,29 @@ function renderEventView(event) {
     document.getElementById('viewModalBody').innerHTML = `
         <div class="event-meta">
             
-        
-
 
             <div class="event-meta-item">
-                <div class="event-meta-label">Driver 1 Class</div>
+                <div class="event-meta-label">Driver 1 Name</div>
                 <div class="event-meta-value">
-                    <span class="badge ${event.driver1_class === 'WRC' ? 'badge-wrc' 
-                        : event.driver1_class === 'WRC2' ? 'badge-wrc2' : 'badge-junior'}">
-                        ${event.driver1_class}
-                    </span>
+                
+                <div class="event-meta-value" style="font-size:13px;font-weight:700">${event.driver1_name}</div>
+
                 </div>
             </div>
             <div class="event-meta-item">
                 <div class="event-meta-label">Driver 1 Car</div>
-                <div class="event-meta-value" style="font-size:13px;font-weight:500">${event.driver1_car}</div>
+                <div class="event-meta-value" style="font-weight:500">${event.driver1_car}</div>
             </div>
+
+
             ${event.driver2_name ? `
             <div class="event-meta-item">
-                <div class="event-meta-label">Driver 2 Class</div>
+                <div class="event-meta-label">Driver 2 Name</div>
                 <div class="event-meta-value">
-                    <span class="badge ${event.driver2_class === 'WRC' ? 'badge-wrc' 
-                        : event.driver2_class === 'WRC2' ? 'badge-wrc2' : 'badge-junior'}">
-                        ${event.driver2_class}
-                    </span>
+                   
+                <div class="event-meta-value" style="font-weight:700">${event.driver2_name}</div>
+
+
                 </div>
             </div>
             <div class="event-meta-item">
@@ -519,7 +517,7 @@ function formatTime(timeStr) {
 // End event
 document.getElementById('btnEndEvent').addEventListener('click', async () => {
     if (!viewingEventId) return;
-    if (!confirm('Merkitäänkö event päättyneeksi?')) return;
+    if (!confirm('Mark the event finished?')) return;
 
     try {
         const res = await fetch(`/events/${viewingEventId}/end`, {
@@ -532,7 +530,7 @@ document.getElementById('btnEndEvent').addEventListener('click', async () => {
         if (!res.ok) throw new Error();
 
         const data = await res.json();
-        showNotif('Event merkitty päättyneeksi!');
+        showNotif('Event finished!');
         document.getElementById('btnEndEvent').style.display = 'none';
 
         // Päivitä status ja total_time listassa
@@ -550,7 +548,7 @@ document.getElementById('btnEndEvent').addEventListener('click', async () => {
             }
         }
     } catch {
-        showNotif('Päivitys epäonnistui.', true);
+        showNotif('Refresh failed!', true);
     }
 });
         // Sulje view-modaali
@@ -561,9 +559,8 @@ document.getElementById('btnEndEvent').addEventListener('click', async () => {
         }
         document.getElementById('btnCloseViewModal').addEventListener('click', closeViewModal);
         document.getElementById('btnCloseViewModal2').addEventListener('click', closeViewModal);
-        document.getElementById('viewModalOverlay').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('viewModalOverlay')) closeViewModal();
-        });
+        document.getElementById('viewModalOverlay').addEventListener('click', closeViewModal()
+        );
 
 
 
@@ -573,7 +570,7 @@ async function saveStageTimeFromView(stageId, eventId, driverNumber = 1) {
     const ms      = document.getElementById(`view-ms-${driverNumber}-${stageId}`).value.padStart(3, '0');
 
     if (!minutes || !seconds || ms.length < 3) {
-        showNotif('Täytä kaikki aikakentät.', true);
+        showNotif('Please fill all time fields', true);
         return;
     }
 
@@ -605,10 +602,10 @@ async function saveStageTimeFromView(stageId, eventId, driverNumber = 1) {
         const timeDiv = row.querySelector('.time-input-row');
         timeDiv.outerHTML = `<div class="stage-time-value" style="font-size:16px">${formattedTime}</div>`;
 
-        showNotif('Aika tallennettu!');
+        showNotif('Time saved succesfully!');
     } catch {
         btn.disabled = false;
         btn.textContent = 'Save';
-        showNotif('Tallennus epäonnistui.', true);
+        showNotif('Saving failed!', true);
     }
 }

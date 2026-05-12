@@ -47,7 +47,7 @@
                     <th>Event</th>
                     <th>Rally</th>
                     <th>Players</th>
-                    <th>Class</th>
+                    <th>Cars</th>
                     <th>Date</th>
                     <th>Status</th>
                     
@@ -73,11 +73,27 @@
                       </td>
                     
                     
-                    <td>
+                    <!-- <td>
                         <span class="badge {{ $event->class === 'WRC' ? 'badge-wrc' : ($event->class === 'WRC2' ? 'badge-wrc2' : 'badge-junior') }}">
                             {{ $event->class }}
                         </span>
+                    </td> -->
+
+                    <td>
+                        
+                        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px">
+                                {{ $event->driver1_car }}
+                            </div>
+                          
+                            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px">
+                                {{ $event->driver2_car }}
+                            </div>
+                          
+
+
                     </td>
+
+
                     <td>{{ $event->start_time->format('d.m.Y') }}</td>
                     <td>
                         <span class="status-dot {{ $event->completed ? 'status-done' : 'status-active' }}">
@@ -271,7 +287,7 @@
         </div>
 
         <div class="modal-footer">
-            <button class="btn-cancel" id="btnCancel">Cancel</button>
+            <button class="btn-cancel" id="btnCancel">Close</button>
             <button class="btn-create" id="btnCreateEvent" disabled>Create Event</button>
         </div>
     </div>
