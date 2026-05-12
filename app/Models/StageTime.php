@@ -9,6 +9,7 @@ class StageTime extends Model
     protected $fillable = [
         'event_id',
         'stage_id',
+        'driver_number',
         'time_result',
         'recorded_at',
     ];

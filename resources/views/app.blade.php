@@ -46,10 +46,11 @@
                 <tr>
                     <th>Event</th>
                     <th>Rally</th>
+                    <th>Players</th>
                     <th>Class</th>
                     <th>Date</th>
                     <th>Status</th>
-                    <th>Total Time</th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -60,6 +61,18 @@
                             <div class="car-name">{{ $event->driver_name }}</div>
                     </td>
                     <td>{{ $event->rally->rally_name }}</td>
+                        <td>
+                            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px">
+                                {{ $event->driver1_name }}
+                            </div>
+                            @if($event->driver2_name)
+                            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px">
+                                {{ $event->driver2_name }}
+                            </div>
+                            @endif
+                      </td>
+                    
+                    
                     <td>
                         <span class="badge {{ $event->class === 'WRC' ? 'badge-wrc' : ($event->class === 'WRC2' ? 'badge-wrc2' : 'badge-junior') }}">
                             {{ $event->class }}
@@ -71,7 +84,21 @@
                             {{ $event->completed ? 'Finished' : 'Active' }}
                         </span>
                     </td>
-                    <td>{{ $event->formatted_total_time ?? '—' }}</td>
+                    <!-- <td>{{ $event->formatted_total_time ?? '—' }}</td> -->
+                    
+                    
+                    <!-- <td>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px">
+                        {{ $event->driver1_name }}
+                    </div>
+                    @if($event->driver2_name)
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px">
+                        {{ $event->driver2_name }}
+                    </div>
+                    @endif
+                    </td>
+                     -->
+                    
                 </tr>
                 @endforeach
             </tbody>
@@ -96,15 +123,27 @@
                 </div>
             </div>
         
-        
-            <div class="form-row">
+            <!-- <div class="form-row">
                 <div class="form-group full">
-                    <label for="driver_name">Driver Name</label>
-                    <input type="text" id="driver_name" placeholder="e.g. Kalle Rovanperä">
+                    <label for="driver1_name">Driver 1 Name</label>
+                    <input type="text" id="driver1_name" placeholder="e.g. Kalle Rovanperä">
                 </div>
             </div>
 
             <div class="form-row">
+                <div class="form-group full">
+                    <label for="driver2_name">Driver 2 Name</label>
+                    <input type="text" id="driver2_name" placeholder="e.g. Sebastien Ogier">
+                </div>
+            </div> -->
+
+
+
+
+
+
+
+            <!-- <div class="form-row">
                 <div class="form-group">
                     <label for="class_select">Class</label>
                     <select id="class_select">
@@ -130,7 +169,87 @@
                         <option value="Toyota GR Yaris Rally2">Toyota GR Yaris Rally2</option>
                     </select>
                 </div>
-            </div>
+            </div> -->
+
+
+
+{{-- DRIVER 1 --}}
+<div class="form-row">
+    <div class="form-group full">
+        <label for="driver1_name">Driver 1 Name</label>
+        <input type="text" id="driver1_name" placeholder="e.g. Kalle Rovanperä">
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-group">
+        <label for="driver1_class">Driver 1 Class</label>
+        <select id="driver1_class">
+            <option value="WRC">WRC</option>
+            <option value="WRC2">WRC2</option>
+            <option value="JUNIOR WRC">Junior WRC</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="driver1_car">Driver 1 Car</label>
+        <select id="driver1_car">
+            <option value="Ford Puma Rally1 HYBRID '23">Ford Puma Rally1 HYBRID '23</option>
+            <option value="Ford Puma Rally1 HYBRID '24">Ford Puma Rally1 HYBRID '24</option>
+            <option value="Hyundai i20 N Rally1 HYBRID '23">Hyundai i20 N Rally1 HYBRID '23</option>
+            <option value="Hyundai i20 N Rally1 HYBRID '24">Hyundai i20 N Rally1 HYBRID '24</option>
+            <option value="Toyota GR Yaris Rally1 HYBRID '23" selected>Toyota GR Yaris Rally1 HYBRID '23</option>
+            <option value="Toyota GR Yaris Rally1 HYBRID '24">Toyota GR Yaris Rally1 HYBRID '24</option>
+            <option value="Citroën C3 Rally2">Citroën C3 Rally2</option>
+            <option value="Ford Fiesta Rally2">Ford Fiesta Rally2</option>
+            <option value="Hyundai i20 N Rally2">Hyundai i20 N Rally2</option>
+            <option value="ŠKODA Fabia Rally2 Evo">ŠKODA Fabia Rally2 Evo</option>
+            <option value="ŠKODA Fabia RS Rally2">ŠKODA Fabia RS Rally2</option>
+            <option value="Toyota GR Yaris Rally2">Toyota GR Yaris Rally2</option>
+        </select>
+    </div>
+</div>
+
+{{-- DRIVER 2 --}}
+<div class="form-row">
+    <div class="form-group full">
+        <label for="driver2_name">Driver 2 Name</label>
+        <input type="text" id="driver2_name" placeholder="e.g. Sébastien Ogier">
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-group">
+        <label for="driver2_class">Driver 2 Class</label>
+        <select id="driver2_class">
+            <option value="WRC">WRC</option>
+            <option value="WRC2">WRC2</option>
+            <option value="JUNIOR WRC">Junior WRC</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="driver2_car">Driver 2 Car</label>
+        <select id="driver2_car">
+            <option value="Ford Puma Rally1 HYBRID '23">Ford Puma Rally1 HYBRID '23</option>
+            <option value="Ford Puma Rally1 HYBRID '24">Ford Puma Rally1 HYBRID '24</option>
+            <option value="Hyundai i20 N Rally1 HYBRID '23">Hyundai i20 N Rally1 HYBRID '23</option>
+            <option value="Hyundai i20 N Rally1 HYBRID '24">Hyundai i20 N Rally1 HYBRID '24</option>
+            <option value="Toyota GR Yaris Rally1 HYBRID '23" selected>Toyota GR Yaris Rally1 HYBRID '23</option>
+            <option value="Toyota GR Yaris Rally1 HYBRID '24">Toyota GR Yaris Rally1 HYBRID '24</option>
+            <option value="Citroën C3 Rally2">Citroën C3 Rally2</option>
+            <option value="Ford Fiesta Rally2">Ford Fiesta Rally2</option>
+            <option value="Hyundai i20 N Rally2">Hyundai i20 N Rally2</option>
+            <option value="ŠKODA Fabia Rally2 Evo">ŠKODA Fabia Rally2 Evo</option>
+            <option value="ŠKODA Fabia RS Rally2">ŠKODA Fabia RS Rally2</option>
+            <option value="Toyota GR Yaris Rally2">Toyota GR Yaris Rally2</option>
+        </select>
+    </div>
+</div>
+
+
+
+
+
+
+
+
 
             <div class="form-row">
                 <div class="form-group full">

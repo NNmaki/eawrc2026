@@ -32,24 +32,29 @@ class EventController extends Controller
     // Luo uusi event (popup-lomakkeen submit)
     public function store(Request $request)
     {
-        $request->validate([
-            'event_name'  => 'required|string|max:255',
-            'driver_name' => 'required|string|max:255',
-            'class'       => 'required|in:WRC,WRC2,JUNIOR WRC',
-            'car'         => 'required|string',
-            'rally_id'    => 'required|exists:rallies,id',
-        ]);
+    $request->validate([
+    'event_name'    => 'required|string|max:255',
+    'driver1_name'  => 'required|string|max:255',
+    'driver1_class' => 'required|in:WRC,WRC2,JUNIOR WRC',
+    'driver1_car'   => 'required|string',
+    'driver2_name'  => 'nullable|string|max:255',
+    'driver2_class' => 'nullable|in:WRC,WRC2,JUNIOR WRC',
+    'driver2_car'   => 'nullable|string',
+    'rally_id'      => 'required|exists:rallies,id',
+    ]);
 
-        $event = Event::create([
-            'event_name'  => $request->event_name,
-            'driver_name' => $request->driver_name,
-            'class'       => $request->class,
-            'car'         => $request->car,
-            'rally_id'    => $request->rally_id,
-            'start_time'  => now(),
-            'completed'   => false,
-        ]);
-
+    $event = Event::create([
+        'event_name'    => $request->event_name,
+        'driver1_name'  => $request->driver1_name,
+        'driver1_class' => $request->driver1_class,
+        'driver1_car'   => $request->driver1_car,
+        'driver2_name'  => $request->driver2_name,
+        'driver2_class' => $request->driver2_class,
+        'driver2_car'   => $request->driver2_car,
+        'rally_id'      => $request->rally_id,
+        'start_time'    => now(),
+        'completed'     => false,
+    ]);
         return response()->json(['event_id' => $event->id]);
     }
 
@@ -70,10 +75,6 @@ class EventController extends Controller
             $request->milliseconds
         );
 
-
-
-
-
         // $stageTime = StageTime::updateOrCreate(
         //     [
         //         'event_id' => $event->id,
@@ -88,23 +89,21 @@ class EventController extends Controller
 
             // ...olemassa oleva koodi pysyy samana...
 
-    $stageTime = StageTime::updateOrCreate(
-        [
-            'event_id' => $event->id,
-            'stage_id' => $request->stage_id,
-        ],
-        [
-            'time_result' => $time,
-            'recorded_at' => now(),
-        ]
-    );
+        $stageTime = StageTime::updateOrCreate(
+            [
+                'event_id' => $event->id,
+                'stage_id' => $request->stage_id,
+                'driver_number' => $request->driver_number,
+            ],
+            [
+                'time_result' => $time,
+                'recorded_at' => now(),
+            ]
+        );
 
-    // Laske ja päivitä total_time aina kun aika tallennetaan
-    $this->updateTotalTime($event);
-    return response()->json(['success' => true, 'time' => $time]);
-
-
-
+        // Laske ja päivitä total_time aina kun aika tallennetaan
+        $this->updateTotalTime($event);
+        return response()->json(['success' => true, 'time' => $time]);
     }
 
     // // Hae eventin tiedot + stage-ajat JSON-vastauksena
@@ -125,22 +124,35 @@ class EventController extends Controller
 
 
     // Merkitse event päättyneeksi
+    public function end(Event $event)
+    {
+        $this->updateTotalTime($event);
+        $event->update(['completed' => true]);
 
-public function end(Event $event)
-{
-    $totalTime = $this->updateTotalTime($event);
+        return response()->json([
+            'success'         => true,
+            'total_time'      => $event->fresh()->formatted_total_time ?? '—',
+            'total_time_driver2' => $event->fresh()->formatted_total_time_driver2 ?? '—',
+        ]);
+    }
 
-    $event->update(['completed' => true]);
 
-    $hours   = (int) substr($totalTime, 0, 2);
-    $minutes = (int) substr($totalTime, 3, 2);
-    $seconds = (int) substr($totalTime, 6, 2);
-    $ms      = (int) substr($totalTime, 9, 3);
 
-    $displayTime = sprintf("%d'%02d\"%03d", ($hours * 60) + $minutes, $seconds, $ms);
+// public function end(Event $event)
+// {
+//     $totalTime = $this->updateTotalTime($event);
 
-    return response()->json(['success' => true, 'total_time' => $displayTime]);
-}
+//     $event->update(['completed' => true]);
+
+//     $hours   = (int) substr($totalTime, 0, 2);
+//     $minutes = (int) substr($totalTime, 3, 2);
+//     $seconds = (int) substr($totalTime, 6, 2);
+//     $ms      = (int) substr($totalTime, 9, 3);
+
+//     $displayTime = sprintf("%d'%02d\"%03d", ($hours * 60) + $minutes, $seconds, $ms);
+
+//     return response()->json(['success' => true, 'total_time' => $displayTime]);
+// }
 
 
 // public function end(Event $event)
@@ -202,26 +214,30 @@ public function end(Event $event)
     //     return response()->json(['success' => true]);
     // }
 
-private function updateTotalTime(Event $event): string
+private function updateTotalTime(Event $event): void
 {
-    $stageTimes = $event->stageTimes()->pluck('time_result');
+    $this->calculateAndSave($event, 1, 'total_time');
+    $this->calculateAndSave($event, 2, 'total_time_driver2');
+}
 
-    $totalMs = $stageTimes->sum(function ($time) {
+private function calculateAndSave(Event $event, int $driverNumber, string $column): void
+{
+    $times = $event->stageTimes()
+        ->where('driver_number', $driverNumber)
+        ->pluck('time_result');
+
+    if ($times->isEmpty()) return;
+
+    $totalMs = $times->sum(function ($time) {
         $parts = explode(':', $time);
-
         if (count($parts) === 3) {
             [$h, $m, $rest] = $parts;
-        } elseif (count($parts) === 2) {
-            $h = 0;
-            [$m, $rest] = $parts;
         } else {
-            return 0;
+            $h = 0; [$m, $rest] = $parts;
         }
-
         $secParts = explode('.', $rest);
         $s  = (int) $secParts[0];
         $ms = isset($secParts[1]) ? (int) str_pad($secParts[1], 3, '0') : 0;
-
         return ((int)$h * 3600000) + ((int)$m * 60000) + ($s * 1000) + $ms;
     });
 
@@ -232,11 +248,7 @@ private function updateTotalTime(Event $event): string
     $seconds = floor($totalMs / 1000);
     $ms      = $totalMs - ($seconds * 1000);
 
-    $totalTime = sprintf('%02d:%02d:%02d.%03d', $hours, $minutes, $seconds, $ms);
-    $event->update(['total_time' => $totalTime]);
-
-    return $totalTime;
+    $event->update([$column => sprintf('%02d:%02d:%02d.%03d', $hours, $minutes, $seconds, $ms)]);
 }
-
 
 }
