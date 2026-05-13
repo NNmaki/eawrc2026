@@ -12,3 +12,6 @@ Route::post('/events/{event}/stage-times', [EventController::class, 'saveStageTi
 Route::get('/events/{event}', [EventController::class, 'show']);
 Route::patch('/events/{event}/end', [EventController::class, 'end']);
 
+Route::get('/leaderboard/stage/{stage}', [LeaderboardController::class, 'stage'])
+    ->name('leaderboard.stage');
+

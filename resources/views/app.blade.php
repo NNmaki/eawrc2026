@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
 
-
-
 </head>
 <body>
 
@@ -27,6 +25,15 @@
             </svg>
             Start New Event
         </button>
+
+        <button class="btn-start" id="btnOpenModal">
+            <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14M5 12h14"/>
+            </svg> -->
+            Leaderboard
+        </button>
+
+
     </div>
 </header>
 
