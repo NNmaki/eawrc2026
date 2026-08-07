@@ -5,21 +5,29 @@
     let stagesData = [];
 
     // ── Open / Close modal ──
-    document.getElementById('btnOpenModal').addEventListener('click', () => {
-        document.getElementById('event_name').value = `EVENT ${nextEventNumber}`;
-        document.getElementById('modalOverlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    });
+    const btnOpenModal = document.getElementById('btnOpenModal');
+    if (btnOpenModal) {
+        btnOpenModal.addEventListener('click', () => {
+            if (typeof nextEventNumber !== 'undefined') {
+                document.getElementById('event_name').value = `EVENT ${nextEventNumber}`;
+            }
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
 
     function closeModal() {
         document.getElementById('modalOverlay').classList.remove('active');
         document.body.style.overflow = '';
         resetModal();
+        location.reload();
     }
 
 
-    document.getElementById('btnCloseModal').addEventListener('click', closeModal);
-    document.getElementById('btnCancel').addEventListener('click', closeModal);
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    const btnCancel = document.getElementById('btnCancel');
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
 
     // document.getElementById('modalOverlay')
     // .addEventListener('click', function (e) {
@@ -58,11 +66,14 @@
 }
 
     // ── Fetch stages when rally is selected ──    
-    document.getElementById('rally_select').addEventListener('change', function () {
-    const rallyId = this.value;
-    const btnCreate = document.getElementById('btnCreateEvent');
-    btnCreate.disabled = !rallyId;
-});
+    const rallySelect = document.getElementById('rally_select');
+    if (rallySelect) {
+        rallySelect.addEventListener('change', function () {
+            const rallyId = this.value;
+            const btnCreate = document.getElementById('btnCreateEvent');
+            if (btnCreate) btnCreate.disabled = !rallyId;
+        });
+    }
 
     function renderStages(stages) {
         const list = document.getElementById('stagesList');
@@ -272,31 +283,34 @@
 }
     // ── "Create Event" -nappi ilman stageja (jos haluaa luoda ensin) ──
 
-document.getElementById('btnCreateEvent').addEventListener('click', async () => {
-    const ok = await ensureEventCreated();
-    if (!ok) return;
+const btnCreateEvent = document.getElementById('btnCreateEvent');
+if (btnCreateEvent) {
+    btnCreateEvent.addEventListener('click', async () => {
+        const ok = await ensureEventCreated();
+        if (!ok) return;
 
-    // Lataa staget vasta nyt
-    const rallyId = document.getElementById('rally_select').value;
-    const list = document.getElementById('stagesList');
-    const wrapper = document.getElementById('stagesWrapper');
+        // Lataa staget vasta nyt
+        const rallyId = document.getElementById('rally_select').value;
+        const list = document.getElementById('stagesList');
+        const wrapper = document.getElementById('stagesWrapper');
 
-    list.innerHTML = '<p style="color:var(--muted);font-size:13px;">Ladataan staget...</p>';
-    wrapper.classList.add('visible');
+        list.innerHTML = '<p style="color:var(--muted);font-size:13px;">Ladataan staget...</p>';
+        wrapper.classList.add('visible');
 
-    try {
-        const res = await fetch(`/rallies/${rallyId}/stages`);
-        stagesData = await res.json();
-        renderStages(stagesData);
-    } catch {
-        list.innerHTML = '<p style="color:var(--accent);font-size:13px;">Virhe stagejen latauksessa.</p>';
-    }
+        try {
+            const res = await fetch(`/rallies/${rallyId}/stages`);
+            stagesData = await res.json();
+            renderStages(stagesData);
+        } catch {
+            list.innerHTML = '<p style="color:var(--accent);font-size:13px;">Virhe stagejen latauksessa.</p>';
+        }
 
-    // Piilota CREATE EVENT -nappi kun event on luotu
-    document.getElementById('btnCreateEvent').style.display = 'none';
+        // Piilota CREATE EVENT -nappi kun event on luotu
+        btnCreateEvent.style.display = 'none';
 
-    showNotif('Event created! Please enter stage times');
-});
+        showNotif('Event created! Please enter stage times');
+    });
+}
 
     // ── Notification ──
     function showNotif(msg, isError = false) {
@@ -522,23 +536,25 @@ function formatTime(timeStr) {
 }
 
 // End event
-document.getElementById('btnEndEvent').addEventListener('click', async () => {
-    if (!viewingEventId) return;
-    if (!confirm('Mark the event finished?')) return;
+const btnEndEvent = document.getElementById('btnEndEvent');
+if (btnEndEvent) {
+    btnEndEvent.addEventListener('click', async () => {
+        if (!viewingEventId) return;
+        if (!confirm('Mark the event finished?')) return;
 
-    try {
-        const res = await fetch(`/events/${viewingEventId}/end`, {
-            method: 'PATCH',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
-            }
-        });
-        if (!res.ok) throw new Error();
+        try {
+            const res = await fetch(`/events/${viewingEventId}/end`, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                }
+            });
+            if (!res.ok) throw new Error();
 
-        const data = await res.json();
-        showNotif('Event finished!');
-        document.getElementById('btnEndEvent').style.display = 'none';
+            const data = await res.json();
+            showNotif('Event finished!');
+            btnEndEvent.style.display = 'none';
 
         // Päivitä status ja total_time listassa
         const row = document.querySelector(`tr[onclick="openEventView(${viewingEventId})"]`);
@@ -558,14 +574,17 @@ document.getElementById('btnEndEvent').addEventListener('click', async () => {
         showNotif('Refresh failed!', true);
     }
 });
+}
         // Sulje view-modaali
         function closeViewModal() {
             document.getElementById('viewModalOverlay').classList.remove('active');
             document.body.style.overflow = '';
             viewingEventId = null;
         }
-        document.getElementById('btnCloseViewModal').addEventListener('click', closeViewModal);
-        document.getElementById('btnCloseViewModal2').addEventListener('click', closeViewModal);
+        const btnCloseViewModal = document.getElementById('btnCloseViewModal');
+        if (btnCloseViewModal) btnCloseViewModal.addEventListener('click', closeViewModal);
+        const btnCloseViewModal2 = document.getElementById('btnCloseViewModal2');
+        if (btnCloseViewModal2) btnCloseViewModal2.addEventListener('click', closeViewModal);
 
    
         // document.getElementById('viewModalOverlay')
@@ -620,4 +639,145 @@ async function saveStageTimeFromView(stageId, eventId, driverNumber = 1) {
         btn.textContent = 'Save';
         showNotif('Saving failed!', true);
     }
+}
+
+// ── Open / Close Single Time Modal ──
+const btnOpenSingleTime = document.getElementById('btnOpenSingleTimeModal');
+const singleTimeModalOverlay = document.getElementById('singleTimeModalOverlay');
+const btnCloseSingleTime = document.getElementById('btnCloseSingleTimeModal');
+const btnCancelSingleTime = document.getElementById('btnCancelSingleTime');
+const btnSaveSingleTime = document.getElementById('btnSaveSingleTime');
+
+if (btnOpenSingleTime) {
+    btnOpenSingleTime.addEventListener('click', () => {
+        singleTimeModalOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+}
+
+function closeSingleTimeModal() {
+    singleTimeModalOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    // Reset values
+    document.getElementById('single_rally_select').value = '';
+    document.getElementById('single_stage_select').innerHTML = '<option value="" disabled selected>— Select Stage —</option>';
+    document.getElementById('singleStageWrapper').style.display = 'none';
+    document.getElementById('single_driver_name').value = '';
+    document.getElementById('single_min').value = '';
+    document.getElementById('single_sec').value = '';
+    document.getElementById('single_ms').value = '';
+}
+
+if (btnCloseSingleTime) btnCloseSingleTime.addEventListener('click', closeSingleTimeModal);
+if (btnCancelSingleTime) btnCancelSingleTime.addEventListener('click', closeSingleTimeModal);
+
+// Dynamic stages load for Single Time Modal
+const singleRallySelect = document.getElementById('single_rally_select');
+if (singleRallySelect) {
+    singleRallySelect.addEventListener('change', async function () {
+        const rallyId = this.value;
+        const stageSelect = document.getElementById('single_stage_select');
+        const stageWrapper = document.getElementById('singleStageWrapper');
+
+        if (!rallyId) {
+            stageWrapper.style.display = 'none';
+            return;
+        }
+
+        stageSelect.innerHTML = '<option value="" disabled selected>Loading stages...</option>';
+        stageWrapper.style.display = 'block';
+
+        try {
+            const res = await fetch(`/rallies/${rallyId}/stages`);
+            if (!res.ok) throw new Error();
+            const stages = await res.json();
+
+            stageSelect.innerHTML = '<option value="" disabled selected>— Select Stage —</option>';
+            stages.forEach(stage => {
+                const opt = document.createElement('option');
+                opt.value = stage.id;
+                opt.textContent = `SS${stage.stage_number} ${stage.stage_name} (${stage.distance_km} km)`;
+                stageSelect.appendChild(opt);
+            });
+        } catch {
+            stageSelect.innerHTML = '<option value="" disabled>Error loading stages.</option>';
+        }
+    });
+}
+
+// Upper case conversion for single driver input
+const singleDriverInput = document.getElementById('single_driver_name');
+if (singleDriverInput) {
+    singleDriverInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase().slice(0, 3);
+    });
+}
+
+// Auto-advance for single time inputs
+const singleMin = document.getElementById('single_min');
+const singleSec = document.getElementById('single_sec');
+const singleMs  = document.getElementById('single_ms');
+if (singleMin) singleMin.addEventListener('input', () => { if (singleMin.value.length === 2) singleSec.focus(); });
+if (singleSec) singleSec.addEventListener('input', () => { if (singleSec.value.length === 2) singleMs.focus(); });
+
+// Save Single Time
+if (btnSaveSingleTime) {
+    btnSaveSingleTime.addEventListener('click', async () => {
+        const rallyId = document.getElementById('single_rally_select').value;
+        const stageId = document.getElementById('single_stage_select').value;
+        const driverName = document.getElementById('single_driver_name').value.trim();
+        const className = document.getElementById('single_class_select').value;
+        const carName = document.getElementById('single_car_select').value;
+        const minutes = document.getElementById('single_min').value.padStart(2, '0');
+        const seconds = document.getElementById('single_sec').value.padStart(2, '0');
+        const ms = document.getElementById('single_ms').value.padStart(3, '0');
+
+        if (!rallyId || !stageId) {
+            showNotif('Please select rally and stage.', true);
+            return;
+        }
+        if (!driverName || driverName.length !== 3) {
+            showNotif('Driver name must be exactly 3 characters.', true);
+            return;
+        }
+        if (!document.getElementById('single_sec').value || ms.length < 3) {
+            showNotif('Please fill all time fields.', true);
+            return;
+        }
+
+        btnSaveSingleTime.disabled = true;
+        btnSaveSingleTime.textContent = 'Saving...';
+
+        try {
+            const res = await fetch('/stage-times/single', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    stage_id: stageId,
+                    driver_name: driverName,
+                    class: className,
+                    car: carName,
+                    minutes: minutes,
+                    seconds: seconds,
+                    milliseconds: ms,
+                })
+            });
+
+            if (!res.ok) throw new Error();
+
+            showNotif('Time saved successfully!');
+            setTimeout(() => {
+                closeSingleTimeModal();
+                location.reload();
+            }, 1000);
+        } catch {
+            btnSaveSingleTime.disabled = false;
+            btnSaveSingleTime.textContent = 'Save Time';
+            showNotif('Saving failed!', true);
+        }
+    });
 }

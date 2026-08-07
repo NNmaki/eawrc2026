@@ -13,6 +13,9 @@ class StageTime extends Model
         'time_result',
         'time_ms',
         'recorded_at',
+        'driver_name',
+        'class',
+        'car',
     ];
 
     public function event()

@@ -15,10 +15,19 @@ class EventController extends Controller
     public function index()
 {
     $rallies = Rally::orderBy('rally_name')->get();
+    $ralliesOrdered = Rally::with(['stages' => function ($query) {
+        $query->orderBy('stage_number');
+    }])->orderBy('id')->get();
     $events  = Event::with('rally')->latest('start_time')->get();
     $nextEventNumber = Event::count() + 1;
-    return view('app', compact('rallies', 'events','nextEventNumber'));
+    return view('app', compact('rallies', 'ralliesOrdered', 'events','nextEventNumber'));
 }
+
+    public function locations()
+    {
+        $rallies = Rally::orderBy('rally_name')->get();
+        return view('locations', compact('rallies'));
+    }
 
 
 
@@ -34,10 +43,10 @@ class EventController extends Controller
     {
     $request->validate([
     'event_name'    => 'required|string|max:255',
-    'driver1_name'  => 'required|string|max:255',
+    'driver1_name'  => 'required|string|size:3',
     'driver1_class' => 'required|in:WRC,WRC2,JUNIOR WRC',
     'driver1_car'   => 'required|string',
-    'driver2_name'  => 'nullable|string|max:255',
+    'driver2_name'  => 'nullable|string|size:3',
     'driver2_class' => 'nullable|in:WRC,WRC2,JUNIOR WRC',
     'driver2_car'   => 'nullable|string',
     'rally_id'      => 'required|exists:rallies,id',
@@ -45,10 +54,10 @@ class EventController extends Controller
 
     $event = Event::create([
         'event_name'    => $request->event_name,
-        'driver1_name'  => $request->driver1_name,
+        'driver1_name'  => strtoupper(trim($request->driver1_name)),
         'driver1_class' => $request->driver1_class,
         'driver1_car'   => $request->driver1_car,
-        'driver2_name'  => $request->driver2_name,
+        'driver2_name'  => $request->driver2_name ? strtoupper(trim($request->driver2_name)) : null,
         'driver2_class' => $request->driver2_class,
         'driver2_car'   => $request->driver2_car,
         'rally_id'      => $request->rally_id,
@@ -103,6 +112,39 @@ class EventController extends Controller
 
         // Laske ja päivitä total_time aina kun aika tallennetaan
         $this->updateTotalTime($event);
+        return response()->json(['success' => true, 'time' => $time]);
+    }
+
+    // Tallenna yksittäinen stagen aika ilman eventtiä
+    public function saveSingleStageTime(Request $request)
+    {
+        $request->validate([
+            'stage_id'     => 'required|exists:stages,id',
+            'driver_name'  => 'required|string|size:3',
+            'class'        => 'required|in:WRC,WRC2,JUNIOR WRC',
+            'car'          => 'required|string',
+            'minutes'      => 'required|digits_between:1,2',
+            'seconds'      => 'required|digits:2',
+            'milliseconds' => 'required|digits:3',
+        ]);
+
+        $time = sprintf('00:%02d:%02d.%s',
+            $request->minutes,
+            $request->seconds,
+            $request->milliseconds
+        );
+
+        $stageTime = StageTime::create([
+            'event_id'      => null,
+            'stage_id'      => $request->stage_id,
+            'driver_number' => 1,
+            'driver_name'   => strtoupper(trim($request->driver_name)),
+            'class'         => $request->class,
+            'car'           => $request->car,
+            'time_result'   => $time,
+            'recorded_at'   => now(),
+        ]);
+
         return response()->json(['success' => true, 'time' => $time]);
     }
 
