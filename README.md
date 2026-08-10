@@ -72,7 +72,11 @@ The application leverages Laravel's MVC architecture to handle routing, database
 
 ## 📸 Screenshots
 
-> _Add screenshots or GIFs of the leaderboard, time entry UX, and stage map here._
+<img width="1293" height="918" alt="eawrc1" src="https://github.com/user-attachments/assets/ba1e991c-28e5-4718-8448-5847317c6572" />
+<img width="1293" height="892" alt="eawrc2" src="https://github.com/user-attachments/assets/9304f875-a9f3-4846-bae4-a0374e040642" />
+<img width="1295" height="914" alt="eawrc3" src="https://github.com/user-attachments/assets/f94fd5ba-c471-4e70-b085-e4cb529294d7" />
+<img width="1279" height="913" alt="eawrc4" src="https://github.com/user-attachments/assets/e884e7c1-3b0a-4f58-ae2a-125527879eb4" />
+
 
 ---
 
