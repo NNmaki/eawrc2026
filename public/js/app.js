@@ -75,7 +75,8 @@
         });
     }
 
-    function renderStages(stages) {
+    function renderStages(stages, driver2Name) {
+        const hasTwoDrivers = !!driver2Name;
         const list = document.getElementById('stagesList');
         list.innerHTML = stages.map(stage => `
             <div class="stage-row" id="stage-row-${stage.id}">
@@ -96,17 +97,10 @@
                             <input type="text" class="sec-input" id="sec-1-${stage.id}" placeholder="00" maxlength="2" inputmode="numeric">
                             <span class="time-sep">"</span>
                             <input type="text" class="ms-input" id="ms-1-${stage.id}" placeholder="000" maxlength="3" inputmode="numeric">
-                
-
-
                             <button class="btn-save-stage" id="btn-1-${stage.id}" onclick="saveStageTime(${stage.id}, 1)">Save</button>
-                  
-                  
-
-
-
                         </div>
                     </div>
+                    ${hasTwoDrivers ? `
                     <div style="display:flex;align-items:center;gap:6px">
                         <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;
                             letter-spacing:2px;color:var(--muted);min-width:24px">D2</span>
@@ -118,25 +112,23 @@
                             <input type="text" class="ms-input" id="ms-2-${stage.id}" placeholder="000" maxlength="3" inputmode="numeric">
                             <button class="btn-save-stage" id="btn-2-${stage.id}" onclick="saveStageTime(${stage.id}, 2)">Save</button>
                         </div>
-                    </div>
+                    </div>` : ''}
                 </div>
             </div>
         `).join('');
 
         // Auto-advance: kun käyttäjä kirjoittaa 2 merkkiä minuutteihin, hyppää sekunteihin jne.
-
+        const activeDrivers = hasTwoDrivers ? [1, 2] : [1];
         stages.forEach(stage => {
-        [1, 2].forEach(driverNum => {
-        const minEl = document.getElementById(`min-${driverNum}-${stage.id}`);
-        const secEl = document.getElementById(`sec-${driverNum}-${stage.id}`);
-        if (minEl) minEl.addEventListener('input', () => { if (minEl.value.length === 2) secEl.focus(); });
-        if (secEl) secEl.addEventListener('input', () => { if (secEl.value.length === 2) {
-            document.getElementById(`ms-${driverNum}-${stage.id}`).focus();
-        }});
-    });
-    });
-
-
+            activeDrivers.forEach(driverNum => {
+                const minEl = document.getElementById(`min-${driverNum}-${stage.id}`);
+                const secEl = document.getElementById(`sec-${driverNum}-${stage.id}`);
+                if (minEl) minEl.addEventListener('input', () => { if (minEl.value.length === 2) secEl.focus(); });
+                if (secEl) secEl.addEventListener('input', () => { if (secEl.value.length === 2) {
+                    document.getElementById(`ms-${driverNum}-${stage.id}`).focus();
+                }});
+            });
+        });
     }
 
 
@@ -300,7 +292,8 @@ if (btnCreateEvent) {
         try {
             const res = await fetch(`/rallies/${rallyId}/stages`);
             stagesData = await res.json();
-            renderStages(stagesData);
+            const driver2NameVal = document.getElementById('driver2_name').value.trim();
+            renderStages(stagesData, driver2NameVal);
         } catch {
             list.innerHTML = '<p style="color:var(--accent);font-size:13px;">Virhe stagejen latauksessa.</p>';
         }
@@ -511,9 +504,10 @@ function renderEventView(event) {
         ${totalTimeRow}
     `;
 
-    // Auto-advance kenttien välillä
+    // Auto-advance kenttien välillä (vain aktiiviset driverit)
+    const activeViewDrivers = event.driver2_name ? [1, 2] : [1];
     event.rally.stages.forEach(stage => {
-        [1, 2].forEach(driverNum => {
+        activeViewDrivers.forEach(driverNum => {
             const minEl = document.getElementById(`view-min-${driverNum}-${stage.id}`);
             const secEl = document.getElementById(`view-sec-${driverNum}-${stage.id}`);
             const msEl  = document.getElementById(`view-ms-${driverNum}-${stage.id}`);

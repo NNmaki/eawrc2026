@@ -13,16 +13,17 @@ class RecordObserver
      */
     public function created(StageTime $record): void
     {
-    // Lähetetään sähköposti haluttuun osoitteeseen
-    Mail::to('niko@nnmaki.com')->send(new NewRecordNotification($record));
+        Mail::to('niko@nnmaki.com')->send(new NewRecordNotification($record));
     }
 
     /**
      * Handle the Record "updated" event.
+     * Tarvitaan koska event-modessa käytetään updateOrCreate(),
+     * joka triggeröi updated- eikä created-eventiä kun aika tallennetaan uudelleen.
      */
     public function updated(StageTime $record): void
     {
-        //
+        Mail::to('niko@nnmaki.com')->send(new NewRecordNotification($record));
     }
 
     /**

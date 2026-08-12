@@ -105,15 +105,29 @@ class EventController extends Controller
 
             // ...olemassa oleva koodi pysyy samana...
 
+        $driverNumber = (int) $request->driver_number;
+
+        // Estä driver_number=2 tallennukset jos eventillä ei ole driver2:ta
+        if ($driverNumber === 2 && empty($event->driver2_name)) {
+            return response()->json(['error' => 'No driver 2 registered for this event.'], 422);
+        }
+
+        $driverName  = $driverNumber === 2 ? $event->driver2_name : $event->driver1_name;
+        $driverClass = $driverNumber === 2 ? $event->driver2_class : $event->driver1_class;
+        $driverCar   = $driverNumber === 2 ? $event->driver2_car   : $event->driver1_car;
+
         $stageTime = StageTime::updateOrCreate(
             [
-                'event_id' => $event->id,
-                'stage_id' => $request->stage_id,
-                'driver_number' => $request->driver_number,
+                'event_id'      => $event->id,
+                'stage_id'      => $request->stage_id,
+                'driver_number' => $driverNumber,
             ],
             [
                 'time_result' => $time,
                 'recorded_at' => now(),
+                'driver_name' => $driverName,
+                'class'       => $driverClass,
+                'car'         => $driverCar,
             ]
         );
 
