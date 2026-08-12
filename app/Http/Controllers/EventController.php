@@ -52,14 +52,16 @@ class EventController extends Controller
     'rally_id'      => 'required|exists:rallies,id',
     ]);
 
+    $driver2Name = $request->driver2_name ? strtoupper(trim($request->driver2_name)) : null;
+
     $event = Event::create([
         'event_name'    => $request->event_name,
         'driver1_name'  => strtoupper(trim($request->driver1_name)),
         'driver1_class' => $request->driver1_class,
         'driver1_car'   => $request->driver1_car,
-        'driver2_name'  => $request->driver2_name ? strtoupper(trim($request->driver2_name)) : null,
-        'driver2_class' => $request->driver2_class,
-        'driver2_car'   => $request->driver2_car,
+        'driver2_name'  => $driver2Name,
+        'driver2_class' => $driver2Name ? $request->driver2_class : null,
+        'driver2_car'   => $driver2Name ? $request->driver2_car   : null,
         'rally_id'      => $request->rally_id,
         'start_time'    => now(),
         'completed'     => false,

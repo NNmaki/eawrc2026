@@ -109,9 +109,11 @@
                                 {{ $event->driver1_car }}
                             </div>
                           
+                            @if($event->driver2_name)
                             <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px">
                                 {{ $event->driver2_car }}
                             </div>
+                            @endif
                           
 
 

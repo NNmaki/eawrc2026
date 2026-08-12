@@ -11,12 +11,13 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewRecordNotification extends Mailable
+// class NewRecordNotification extends Mailable
 
 // Talla voi ottaa kayttoon jonotuksen, mutta se vaatii ajamaan palvelimella:
 // php artisan queue:work --stop-when-empty
 // Pitaa tehda cron job hostingerilla
-// class NewRecordNotification extends Mailable implements ShouldQueue
+
+class NewRecordNotification extends Mailable implements ShouldQueue
 
 {
     use Queueable, SerializesModels;

@@ -52,6 +52,22 @@ class Event extends Model
         return $this->hasMany(StageTime::class);
     }
 
+    /**
+     * Jos pelaaja 2:n nimi on tyhjä, pakotetaan auto nulliksi.
+     */
+    public function setDriver2CarAttribute(?string $value): void
+    {
+        $this->attributes['driver2_car'] = $this->driver2_name ? $value : null;
+    }
+
+    /**
+     * Jos pelaaja 2:n nimi on tyhjä, pakotetaan luokka nulliksi.
+     */
+    public function setDriver2ClassAttribute(?string $value): void
+    {
+        $this->attributes['driver2_class'] = $this->driver2_name ? $value : null;
+    }
+
     // Vanha yhden pelaajan ajan kutsuminen
     // public function getFormattedTotalTimeAttribute(): ?string
     // {
