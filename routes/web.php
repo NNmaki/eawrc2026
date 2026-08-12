@@ -20,4 +20,5 @@ Route::get('/leaderboard/stage/{stage}', [LeaderboardController::class, 'stage']
     ->name('leaderboard.stage');
 
 Route::get('/locations', [EventController::class, 'locations'])->name('locations');
+Route::get('/guide', [EventController::class, 'guide'])->name('guide');
 

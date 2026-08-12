@@ -29,6 +29,11 @@ class EventController extends Controller
         return view('locations', compact('rallies'));
     }
 
+    public function guide()
+    {
+        return view('guide');
+    }
+
 
 
     // AJAX: palauttaa staget kun rally valitaan
