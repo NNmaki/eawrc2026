@@ -1,3 +1,4 @@
+
 # 🏁 EAWRC Results Tracker
 
 A custom-built web application for rallying enthusiasts — specifically tailored around **EA Sports WRC** — to record, manage, and analyze stage times. EAWRC Results Tracker serves as a centralized hub to track multi-driver events, compare performance across different car classes, and view real-world stage locations.
